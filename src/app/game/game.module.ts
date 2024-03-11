@@ -3,11 +3,13 @@ import { CommonModule } from '@angular/common';
 
 import { GameRoutingModule } from './game-routing.module';
 import { GameComponent } from './game.component';
+import { CardComponent } from '../components/card/card.component';
 
 
 @NgModule({
   declarations: [
-    GameComponent
+    GameComponent,
+    CardComponent
   ],
   imports: [
     CommonModule,
