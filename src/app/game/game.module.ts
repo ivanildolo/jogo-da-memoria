@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { GameRoutingModule } from './game-routing.module';
 import { GameComponent } from './game.component';
 import { CardComponent } from '../components/card/card.component';
+import { MaterialModule } from '@app/shared/material/material.module';
 
 
 @NgModule({
@@ -13,7 +14,8 @@ import { CardComponent } from '../components/card/card.component';
   ],
   imports: [
     CommonModule,
-    GameRoutingModule
+    GameRoutingModule,
+    MaterialModule
   ]
 })
 export class GameModule { }

@@ -1,15 +1,18 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-card',
   templateUrl: './card.component.html',
   styleUrls: ['./card.component.scss']
 })
-export class CardComponent {
-  @Input() imageUrl!: string; // URL da imagem da carta
-  isFlipped: boolean = false; // Estado da carta (virada ou não)
+export class CardComponent implements OnInit{
 
-  flipCard() {
-    this.isFlipped = !this.isFlipped; // Inverte o estado da carta
+  @Input() imageUrl!: string; 
+  @Input() isFlipped: boolean = true;
+
+  ngOnInit(): void {
+    setTimeout(() => {
+      this.isFlipped = false;
+    }, 3000);
   }
 }
