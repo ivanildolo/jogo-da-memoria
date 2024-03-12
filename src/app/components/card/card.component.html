@@ -1,1 +1,9 @@
-<p>card works!</p>
+<div class="card-container" (click)="flipCard()">
+    <div class="card" [class.flipped]="isFlipped">
+      <div class="front-face"></div>
+      <div class="back-face">
+        <img [src]="imageUrl" alt="Card Image">
+      </div>
+    </div>
+  </div>
+  
