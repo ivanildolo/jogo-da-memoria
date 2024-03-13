@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { CardModel, CardsModel } from '@app/models/card-model';
-import { HttpPokemonCardsService } from '@app/services/http-pokemon-cards.service';
+import { HttpPokemonCardsService } from '@app/game/http-services/http-pokemon-cards.service';
+import { MemoryGameValidatorService } from './util-services/memory-game-validator-service';
+import { timer } from 'rxjs';
 
 @Component({
   selector: 'app-game',
@@ -8,57 +10,76 @@ import { HttpPokemonCardsService } from '@app/services/http-pokemon-cards.servic
   styleUrl: './game.component.scss',
 })
 export class GameComponent {
-  public cards: CardModel[] = [];
   public doubleCards: CardModel[] = [];
   public filter = { pageSize: 5, page: Math.floor(Math.random() * 2728) };
   public loading: boolean = false;
   public firstCard?: CardModel;
   public firstCardIndex?: number;
 
-  trackByIndex(index: number) {
-    return index;
-  }
-
-  constructor(private httpPokemonCardsService: HttpPokemonCardsService) {}
+  constructor(
+    private httpPokemonCards: HttpPokemonCardsService,
+    private memoryGameValidator: MemoryGameValidatorService
+  ) {}
 
   public getCards() {
     this.loading = true;
-    this.httpPokemonCardsService
+    this.httpPokemonCards
       .getCards(this.filter)
       .subscribe((response: CardsModel) => {
-        this.cards = response.cards;
-        this.doubleCards = [...this.cards, ...this.cards]
+        this.doubleCards = [...response.cards, ...response.cards]
           .map((card) => ({ ...card }))
           .sort(() => Math.random() - 0.5);
-        this.loading = false;
+        timer(3000).subscribe(() => {
+          this.loading = false;
+        });
       });
   }
 
   flipCard(card: CardModel, index: number) {
-    card.toogleFlip = true;
-    if (this.firstCard === undefined) {
-      this.firstCard = card;
-      this.firstCardIndex = index;
+    this.loading = true;
+    // this.memoryGameValidator.flipCard(this.firstCard, card).subscribe(() => {
+    //   this.loading = false;
+    // })
+    if (card.toogleFlip === true) {
       return;
     }
-    if (this.firstCard.id === card.id && this.firstCardIndex !== index) {
-      setTimeout(() => {
+    this.loading = true;
+    card.toogleFlip = true;
+    if (this.firstCard === undefined && card.toogleFlip === true) {
+      this.firstCard = card;
+      this.firstCardIndex = index;
+      this.loading = false;
+      return;
+    }
+    if (
+      this.firstCard?.id === card.id &&
+      this.firstCardIndex !== index &&
+      card.toogleFlip === true
+    ) {
+      timer(1000).subscribe(() => {
         if (this.firstCard !== undefined) {
           this.firstCard.hiddenCard = true;
           this.firstCard = undefined;
         }
         card.hiddenCard = true;
-      }, 2000);
+        this.loading = false;
+      });
       return;
     }
-    if (this.firstCard.id !== card.id) {
-      setTimeout(() => {
-        if (this.firstCard !== undefined) {
+    if (
+      this.firstCard !== undefined &&
+      this.firstCard?.id !== card.id &&
+      this.firstCardIndex !== index &&
+      card.toogleFlip === true
+    ) {
+      timer(2000).subscribe(() => {
+        if (this.firstCard) {
           this.firstCard.toogleFlip = false;
           this.firstCard = undefined;
         }
         card.toogleFlip = false;
-      }, 2000);
+        this.loading = false;
+      });
     }
   }
 

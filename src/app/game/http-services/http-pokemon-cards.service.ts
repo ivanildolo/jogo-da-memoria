@@ -1,11 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { CardsModel } from '../models/card-model';
+import { CardsModel } from '@app/models/card-model';
 import { Observable } from 'rxjs';
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable()
 export class HttpPokemonCardsService {
   constructor(private http: HttpClient) {}
 
