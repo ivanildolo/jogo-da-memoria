@@ -14,6 +14,7 @@ export class GameComponent {
   public filter = { pageSize: 5, page: Math.floor(Math.random() * 2728) };
   public loading: boolean = false;
   public firstCard?: CardModel;
+  public secondCard?: CardModel;
   public firstCardIndex?: number;
 
   constructor(
@@ -29,56 +30,53 @@ export class GameComponent {
         this.doubleCards = [...response.cards, ...response.cards]
           .map((card) => ({ ...card }))
           .sort(() => Math.random() - 0.5);
-        timer(3000).subscribe(() => {
-          this.loading = false;
-        });
+        this.loading = false;
       });
   }
 
   flipCard(card: CardModel, index: number) {
-    this.loading = true;
     // this.memoryGameValidator.flipCard(this.firstCard, card).subscribe(() => {
     //   this.loading = false;
     // })
-    if (card.toogleFlip === true) {
+    if (card.toogleFlip === true || this.secondCard?.toogleFlip === true) {
       return;
     }
-    this.loading = true;
     card.toogleFlip = true;
-    if (this.firstCard === undefined && card.toogleFlip === true) {
+    if (this.firstCard === undefined) {
       this.firstCard = card;
       this.firstCardIndex = index;
-      this.loading = false;
       return;
     }
+    if (this.firstCard !== undefined && this.secondCard === undefined) {
+      this.secondCard = card;
+    }
     if (
-      this.firstCard?.id === card.id &&
-      this.firstCardIndex !== index &&
-      card.toogleFlip === true
+      this.firstCard?.id === this.secondCard?.id &&
+      this.firstCardIndex !== index
     ) {
-      timer(1000).subscribe(() => {
+      timer(2000).subscribe(() => {
         if (this.firstCard !== undefined) {
           this.firstCard.hiddenCard = true;
           this.firstCard = undefined;
         }
-        card.hiddenCard = true;
-        this.loading = false;
+        if (this.secondCard !== undefined) {
+          this.secondCard.hiddenCard = true;
+          this.secondCard = undefined;
+        }
       });
       return;
     }
     if (
-      this.firstCard !== undefined &&
-      this.firstCard?.id !== card.id &&
-      this.firstCardIndex !== index &&
-      card.toogleFlip === true
+      this.firstCard?.id !== this.secondCard?.id &&
+      this.firstCardIndex !== index
     ) {
       timer(2000).subscribe(() => {
-        if (this.firstCard) {
+        if (this.firstCard && this.secondCard !== undefined) {
           this.firstCard.toogleFlip = false;
           this.firstCard = undefined;
+          this.secondCard.toogleFlip = false;
+          this.secondCard = undefined;
         }
-        card.toogleFlip = false;
-        this.loading = false;
       });
     }
   }
