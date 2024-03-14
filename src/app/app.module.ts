@@ -7,11 +7,13 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 import { MaterialModule } from './shared/material/material.module';
 import { MenuComponent } from './components/menu/menu.component';
 import { HttpClientModule } from '@angular/common/http';
+import { DialogCongratulationsComponent } from './components/dialog-congratulations/dialog-congratulations.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     MenuComponent,
+    DialogCongratulationsComponent,
   ],
   imports: [
     BrowserModule,

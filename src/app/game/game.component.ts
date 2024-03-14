@@ -2,7 +2,9 @@ import { Component } from '@angular/core';
 import { CardModel, CardsModel } from '@app/models/card-model';
 import { HttpPokemonCardsService } from '@app/game/http-services/http-pokemon-cards.service';
 import { MemoryGameValidatorService } from './util-services/memory-game-validator-service';
-import { timer } from 'rxjs';
+import { BehaviorSubject, filter, map, timer } from 'rxjs';
+import { MatDialog } from '@angular/material/dialog';
+import { DialogCongratulationsComponent } from '@app/components/dialog-congratulations/dialog-congratulations.component';
 
 @Component({
   selector: 'app-game',
@@ -10,18 +12,23 @@ import { timer } from 'rxjs';
   styleUrl: './game.component.scss',
 })
 export class GameComponent {
-  public doubleCards: CardModel[] = [];
-  public filter = { pageSize: 5, page: Math.floor(Math.random() * 2728) };
-  public loading: boolean = false;
-  public firstCard?: CardModel;
-  public secondCard?: CardModel;
-  public firstCardIndex?: number;
+  doubleCards: CardModel[] = [];
+  filter = { pageSize: 5, page: Math.floor(Math.random() * 2728) };
+  loading: boolean = false;
+  firstCard?: CardModel;
+  secondCard?: CardModel;
+  firstCardIndex?: number;
+
+  cartasSubject$: BehaviorSubject<CardModel[]> = new BehaviorSubject<CardModel[]>([]);
+
 
   constructor(
     private httpPokemonCards: HttpPokemonCardsService,
-    private memoryGameValidator: MemoryGameValidatorService
-  ) {}
-
+    private memoryGameValidator: MemoryGameValidatorService,
+    public dialog: MatDialog
+    ) {}
+    
+ 
   public getCards() {
     this.loading = true;
     this.httpPokemonCards
@@ -33,6 +40,7 @@ export class GameComponent {
         this.loading = false;
       });
   }
+  
 
   flipCard(card: CardModel, index: number) {
     // this.memoryGameValidator.flipCard(this.firstCard, card).subscribe(() => {
@@ -63,6 +71,7 @@ export class GameComponent {
           this.secondCard.hiddenCard = true;
           this.secondCard = undefined;
         }
+        this.cartasSubject$.next(this.doubleCards);
       });
       return;
     }
@@ -81,7 +90,30 @@ export class GameComponent {
     }
   }
 
+  openDialog() {
+    const dialogRef = this.dialog.open(DialogCongratulationsComponent, {
+      data: {animal: 'panda', name: 'Urso'},
+      width: '450px',
+      height: '250px',
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      this.getCards();
+    });
+  }
+  
+
   ngOnInit(): void {
     this.getCards();
+    this.cartasSubject$.pipe(
+      filter(cards => cards.length > 0),
+      map(cards =>{ 
+        return cards.every(cards => cards.hiddenCard === true)
+      })
+      ).subscribe(allCardsIsHidden => {
+      if (allCardsIsHidden) {
+        this.openDialog();
+      }
+    });
   }
 }
