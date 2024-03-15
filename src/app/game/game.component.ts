@@ -13,7 +13,6 @@ import { DialogCongratulationsComponent } from '@app/components/dialog-congratul
 })
 export class GameComponent {
   doubleCards: CardModel[] = [];
-  filter = { pageSize: 5, page: Math.floor(Math.random() * 2728) };
   loading: boolean = false;
   firstCard?: CardModel;
   secondCard?: CardModel;
@@ -31,8 +30,9 @@ export class GameComponent {
  
   public getCards() {
     this.loading = true;
+    const filter = { pageSize: 5, page: Math.floor(Math.random() * 2728) };
     this.httpPokemonCards
-      .getCards(this.filter)
+      .getCards(filter)
       .subscribe((response: CardsModel) => {
         this.doubleCards = [...response.cards, ...response.cards]
           .map((card) => ({ ...card }))
